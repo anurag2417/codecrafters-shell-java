@@ -5,6 +5,7 @@ import java.nio.file.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
+        Path currentDirectory = Paths.get(System.getProperty("user.dir"));
         try (Scanner sc = new Scanner(System.in)) {
             
             while(true){
@@ -20,7 +21,7 @@ public class Main {
                     break;
                 }
                 if (command.equals("pwd")) {
-                    System.out.println(System.getProperty("user.dir"));
+                    System.out.println(currentDirectory.toAbsolutePath());
                     continue;
                 }
                 if (command.startsWith("echo")) {
@@ -34,7 +35,8 @@ public class Main {
                     if (arg.equals("echo")
                         || arg.equals("exit")
                         || arg.equals("type")
-                        || arg.equals("pwd")) {
+                        || arg.equals("pwd")
+                        || arg.equals("cd")) {
                         System.out.println(arg + " is a shell builtin");
                         continue;
                     }
@@ -50,6 +52,23 @@ public class Main {
                     continue;
                 }
 
+                if (command.startsWith("cd ")) {
+                    String target = command.substring(3);
+
+                    Path newDir = Paths.get(target);
+
+                    if (Files.exists(newDir) && Files.isDirectory(newDir)) {
+                        currentDirectory = newDir.toAbsolutePath().normalize();
+                    } else {
+                        System.out.println(
+                            "cd: " + target + ": No such file or directory"
+                        );
+                    }
+
+                    continue;
+                }
+
+
                 String[] parts = command.split("\\s+");
                 Path executable = findExecutable(parts[0]);
                 if (executable != null) {
@@ -59,7 +78,7 @@ public class Main {
                     cmd.add(parts[i]);
                 }
                 Process process = new ProcessBuilder(cmd)
-                        .directory(executable.getParent().toFile())
+                        .directory(currentDirectory.toFile())
                         .inheritIO()
                         .start();    
 
