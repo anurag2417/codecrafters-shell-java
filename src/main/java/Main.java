@@ -20,6 +20,21 @@ public class Main {
                     System.out.println(command.substring(5));
                     continue;
                 }
+
+                if(command.startsWith("type ")) {
+                    String arg = command.substring(5);
+
+                    if(arg.equals("echo") ||
+                        arg.equals("exit") ||
+                        arg.equals("type")
+                    ) {
+                        System.out.println(arg + " is a shell builtin");
+                    } else {
+                        System.out.println(arg + ": not found ");
+                    }
+                    continue;
+                }
+
                 System.out.println(command + ": command not found");
             }
         }
